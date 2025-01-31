@@ -1,5 +1,10 @@
 import { FormEvent, useRef, useState } from "react";
 
+type Pokemon = {
+  name: string;
+  sprites: { front_default: string };
+};
+
 const App: React.FC = () => {
   const pokemonNameRef = useRef<HTMLInputElement>(null);
   const [pokemonName, setPokemonName] = useState("");
@@ -21,7 +26,7 @@ const App: React.FC = () => {
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
-      const json = await response.json();
+      const json: Pokemon = await response.json();
       setPokemonName(json.name);
       setPokemonImage(json.sprites.front_default);
     } catch (error) {
