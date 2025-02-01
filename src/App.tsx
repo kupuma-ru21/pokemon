@@ -1,30 +1,32 @@
-import {
-  Button,
-  Flex,
-  Form,
-  Image,
-  Input,
-  InputRef,
-  Skeleton,
-  Typography,
-} from "antd";
-import { error } from "console";
-import { FormEvent, useRef, useState } from "react";
+import { Button, Flex, Form, Image, Input, Skeleton, Typography } from "antd";
+import { useState } from "react";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { FormItem } from "react-hook-form-antd";
 
 type Pokemon = {
   name: string;
   sprites: { front_default: string };
 };
 
+const schema = z.object({
+  pokemonName: z
+    .string()
+    .min(1, { message: "Required" })
+    // NOTE: Crabominable is the longest Pokemon name
+    .max(12, { message: "PokemonName has to be less than 15 characters" }),
+});
+
+type Input = z.infer<typeof schema>;
+
 const App: React.FC = () => {
-  const pokemonNameRef = useRef<InputRef>(null);
   const [pokemonName, setPokemonName] = useState("");
   const [pokemonImage, setPokemonImage] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  const searchPokemon = async () => {
+  const searchPokemon = async ({ pokemonName }: Input) => {
     setIsSearching(true);
-    const pokemonName = pokemonNameRef.current?.input?.value;
     if (pokemonName === null) {
       console.error("pokemonName not found");
       window.alert("Oops! Something went wrong");
@@ -48,22 +50,30 @@ const App: React.FC = () => {
     }
   };
 
+  const { control, handleSubmit } = useForm<Input>({
+    defaultValues: { pokemonName: "" },
+    resolver: zodResolver(schema),
+  });
+
   return (
     <div style={{ textAlign: "center" }}>
       <Typography.Title>Pokemon</Typography.Title>
-      <Form onFinish={searchPokemon} style={{ marginBottom: "20px" }}>
-        <Flex gap="large">
+      <Form
+        onFinish={handleSubmit(searchPokemon)}
+        style={{ marginBottom: "20px" }}
+      >
+        <FormItem control={control} name="pokemonName">
           <Input
-            ref={pokemonNameRef}
             type="text"
             placeholder="Search Pokemon"
-            required
             disabled={isSearching}
           />
+        </FormItem>
+        <Form.Item>
           <Button type="primary" htmlType="submit" loading={isSearching}>
             Search
           </Button>
-        </Flex>
+        </Form.Item>
       </Form>
       <div>
         {isSearching ? (
