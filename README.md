@@ -1,4 +1,4 @@
-Clone the front end repository from: https://github.com/sachinthack/FE_Challenge
+Clone the front end repository from: https://github.com/kupuma-ru21/pokemon
 
 Navigate to the repository folder in your local environment and run the following command to install the necessary dependencies.
 
@@ -17,4 +17,5 @@ You will be able to see the web page at
 ```
 localhost:3000
 ```
+
 # pokemon
