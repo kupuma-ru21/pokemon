@@ -1,3 +1,14 @@
+import {
+  Button,
+  Flex,
+  Form,
+  Image,
+  Input,
+  InputRef,
+  Skeleton,
+  Typography,
+} from "antd";
+import { error } from "console";
 import { FormEvent, useRef, useState } from "react";
 
 type Pokemon = {
@@ -6,15 +17,14 @@ type Pokemon = {
 };
 
 const App: React.FC = () => {
-  const pokemonNameRef = useRef<HTMLInputElement>(null);
+  const pokemonNameRef = useRef<InputRef>(null);
   const [pokemonName, setPokemonName] = useState("");
   const [pokemonImage, setPokemonImage] = useState("");
   const [isSearching, setIsSearching] = useState(false);
 
-  const searchPokemon = async (e: FormEvent) => {
-    e.preventDefault();
+  const searchPokemon = async () => {
     setIsSearching(true);
-    const pokemonName = pokemonNameRef.current?.value;
+    const pokemonName = pokemonNameRef.current?.input?.value;
     if (pokemonName === null) {
       console.error("pokemonName not found");
       window.alert("Oops! Something went wrong");
@@ -24,7 +34,8 @@ const App: React.FC = () => {
         `https://pokeapi.co/api/v2/pokemon/${pokemonName}`
       );
       if (!response.ok) {
-        throw new Error(`Response status: ${response.status}`);
+        console.error(`Response status: ${response.status}`);
+        window.alert("Oops! Something went wrong");
       }
       const json: Pokemon = await response.json();
       setPokemonName(json.name);
@@ -39,20 +50,43 @@ const App: React.FC = () => {
 
   return (
     <div style={{ textAlign: "center" }}>
-      <h1>Pokemon</h1>
-      <form onSubmit={searchPokemon}>
-        <fieldset disabled={isSearching}>
-          <input
+      <Typography.Title>Pokemon</Typography.Title>
+      <Form onFinish={searchPokemon} style={{ marginBottom: "20px" }}>
+        <Flex gap="large">
+          <Input
             ref={pokemonNameRef}
             type="text"
             placeholder="Search Pokemon"
+            required
+            disabled={isSearching}
           />
-          <button type="submit">Search</button>
-        </fieldset>
-      </form>
+          <Button type="primary" htmlType="submit" loading={isSearching}>
+            Search
+          </Button>
+        </Flex>
+      </Form>
       <div>
-        <img src={pokemonImage || undefined} alt={pokemonName} />
-        <h2>{pokemonName}</h2>
+        {isSearching ? (
+          <>
+            <Skeleton.Image style={{ width: "200px", height: "200px" }} />
+            <Typography.Title level={2}>
+              <Skeleton.Node style={{ height: "40px", width: "200px" }} />
+            </Typography.Title>
+          </>
+        ) : (
+          <>
+            {pokemonImage ? (
+              <Image
+                width={200}
+                height={200}
+                src={pokemonImage || undefined}
+                alt={pokemonName}
+                hidden={!isSearching}
+              />
+            ) : null}
+            <Typography.Title level={2}>{pokemonName}</Typography.Title>
+          </>
+        )}
       </div>
     </div>
   );
